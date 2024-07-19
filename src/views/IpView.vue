@@ -2,8 +2,10 @@
     <main>
         <div class="content-column">
             <div
-                v-for="ip in ipInfo"
-                class="content-column__item">
+                v-for="(ip, index) in ipInfo"
+                :key="index"
+                class="content-column__item"
+            >
                     <div class="content-column__item-title">{{ ip.key }}</div>
                     <div class="content-column__item-value">{{ ip.value || '-' }}</div>
             </div>
@@ -12,9 +14,11 @@
 </template>
 
 <script setup>
-import axios from 'axios'
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useIpStore } from '../stores/ipStore'
+
+const ipStore = useIpStore()
 
 const route = useRoute()
 
@@ -22,9 +26,11 @@ const ipInfo = ref([])
 
 const fetchIpInfo = async () => {
     try {
-        const response = await axios.get(`http://ip-api.com/json/${route.params.ip}`)
+        const response = await ipStore.findIp(route.params.ip)
 
-        for (const [key, value] of Object.entries(response.data)) {
+        console.log(response)
+
+        for (const [key, value] of Object.entries(response)) {
             if (key !== 'status') {
                 ipInfo.value.push({ key, value })
             }

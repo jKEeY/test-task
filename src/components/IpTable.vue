@@ -49,10 +49,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useIpStore } from '../stores/ipStore';
 import { useRouter } from 'vue-router';
-import debounce from 'lodash/debounce';
 
 const ipStore = useIpStore();
 const searchQuery = ref('');
@@ -66,10 +65,6 @@ const filteredIpData = computed(() =>
     )
   )
 );
-
-const onSearch = debounce(() => {
-  searchQuery.value = newSearch || '';
-}, 300);
 
 const viewDetails = (ip) => {
   router.push({ name: 'ip-info', params: { ip } });

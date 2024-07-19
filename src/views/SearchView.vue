@@ -1,5 +1,15 @@
 <template>
     <div class="search-view">
+        <div v-if="ipStore.failIpSearch.length">
+            <el-alert
+                v-for="(ip, index) in ipStore.failIpSearch"
+                :key="index"
+                :description="ip"
+                title="Ошибка поиска ip:"
+                type="error"
+                class="search-view__error"
+                show-icon />
+        </div>
         <el-card>
             <el-form>
                 <h1 class="search-view__title">Search IP address</h1>
@@ -25,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useIpStore } from '../stores/ipStore'
 import { useRouter, useRoute } from 'vue-router'
 import IpTable from '../components/IpTable.vue'
@@ -40,23 +50,24 @@ const ipAddresses = ref('')
 const fetchIpData = () => {
     const ipList = ipAddresses.value
         .split('\n')
-        .filter(ip => ip.trim() !== '')
+        .map(ip => ip.trim())
+        .filter(ip => ip !== '')
 
     ipStore.fetchIpData(ipList)
 };
 
-const updateQueryParams = debounce((newVal) => {
-    router.replace({ query: { ips: newVal } })
+const updateQueryParams = debounce((newVal: string) => {
+    router.replace({ query: { ips: newVal.trim() } })
 }, 500);
 
-const onIpInput = (event) => {
+const onIpInput = (event: string) => {
     ipAddresses.value = event
     updateQueryParams(event)
 };
 
 onMounted(() => {
-    if (!!route.query.ips) {
-        ipAddresses.value = route.query.ips
+    if (route.query.ips) {
+        ipAddresses.value = route.query.ips as string
         fetchIpData()
     }
 });
@@ -81,6 +92,10 @@ onMounted(() => {
     }
 
     .search-view__action {
+        margin-top: 16px;
+    }
+
+    .search-view__error {
         margin-top: 16px;
     }
 </style>
